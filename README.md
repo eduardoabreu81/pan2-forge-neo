@@ -14,9 +14,7 @@
 Generate **videos of up to 20 seconds** with **[PAN 2](https://huggingface.co/IFM/PAN2)**, the world model by the Institute of Foundation Models (MBZUAI), inside Forge Neo - describe a scene and what happens in it, or start from a picture, and get an MP4 made with the checkpoint, preset and Generate button you already know.
 
 > [!Important]
-> **Work in progress - first preview.** The model, its text encoding and its VAE have been checked against the official implementation, but **this version has not been tested on a graphics card yet**. Expect rough edges, and please [report what you find](https://github.com/eduardoabreu81/pan2-forge-neo/issues).
->
-> PAN 2 is a **29-billion-parameter** model: it needs a large graphics card and plenty of system RAM.
+> **Work in progress.** Text-to-video and image-to-video are in this first version, and more is on the way - see [What is not here yet](#-what-is-not-here-yet). PAN 2 is a **29-billion-parameter** model: plan for a large graphics card and plenty of system RAM.
 >
 > This extension requires an up-to-date **Forge Neo** (the `neo` branch, version 2.32 or later). On an older version it stays disabled and tells you so in the console - Forge Neo itself keeps working as usual.
 
@@ -29,7 +27,6 @@ Generate **videos of up to 20 seconds** with **[PAN 2](https://huggingface.co/IF
 - [What is not here yet](#-what-is-not-here-yet)
 - [Installation](#-installation)
 - [Recommended Settings](#%EF%B8%8F-recommended-settings)
-- [Writing Prompts](#%EF%B8%8F-writing-prompts)
 - [Tips](#-tips)
 - [Credits](#-credits)
 
@@ -37,7 +34,7 @@ Generate **videos of up to 20 seconds** with **[PAN 2](https://huggingface.co/IF
 
 ## 🆕 What's New
 
-### v0.1.0 - First Preview
+### v0.1.0 - First Public Preview
 
 - **PAN 2 text-to-video** - on Forge Neo's own loader, samplers and video output
 - **Image-to-video** - your img2img picture becomes the first frame of the clip
@@ -79,8 +76,8 @@ Generate **videos of up to 20 seconds** with **[PAN 2](https://huggingface.co/IF
 
 ## 🚧 What is not here yet
 
-- **Testing on a graphics card** - this first version was checked piece by piece against the official implementation, not yet end to end
-- **Prompt rewriter** - the official workflow turns a short idea into PAN 2's structured description with a language model. Until it is here, write the description yourself or with any chat assistant (see [Writing Prompts](#%EF%B8%8F-writing-prompts))
+- **A visual editor for PAN 2's descriptions** - draw the events, camera moves and actions on a timeline, in the [Regional Boxes](https://github.com/eduardoabreu81/sd-regional-boxes-neo) panel
+- **Prompt rewriter** - the official workflow turns a short idea into PAN 2's structured description with a language model. Until it is here, write the description yourself or with any chat assistant (see [Tips](#-tips))
 - **Full-precision single files** - the official release is split into many files; for now use the single files in INT8 or NVFP4 listed below
 - **GGUF** files
 - **The PAN 2 guardrail** - IFM recommends running PAN 2 behind its separate [safety filter](https://github.com/ifm-ai/pan2-guardrail), which is not part of this extension
@@ -132,9 +129,21 @@ The **pan2** preset sets these.
 
 ---
 
-## ✍️ Writing Prompts
+## 💡 Tips
 
-PAN 2 reads a **structured description** of the scene in JSON. A plain sentence works, but the model follows a structured one much better. A short example of 5 seconds:
+- **Write structured descriptions.** PAN 2 was trained on descriptions of the scene in JSON, and follows them much better than a plain sentence - see the example below
+- **Turn off Dynamic Prompts** (sd-dynamic-prompts) while using PAN 2 - it reads the braces and the `|` of the JSON as its own syntax and changes the prompt
+- **Leave the negative prompt empty** to use the one PAN 2 was released with
+- Keep the description **under about 1480 tokens**: the token counter shows the count, and PAN 2 ignores what goes beyond 1536
+- Set the times in the description to the length of your clip - 241 frames are 0 to 10 seconds
+- From a picture, describe the picture in **init_frame_visual_description** and what happens next in **events**
+- Start with a short clip at a small size to check your setup, then go longer
+- PAN 2 is released under the [Apache 2.0 license](https://huggingface.co/IFM/PAN2). Read its intended uses and limits on the model page, and say that a video is AI-generated wherever it could be mistaken for real footage
+
+<details>
+<summary><b>✍️ How a PAN 2 description is written</b></summary>
+
+A short example of 5 seconds:
 
 ```json
 {"video_style":"realistic handheld footage, one continuous shot","lighting":"soft overcast daylight","perspective_view":"eye-level medium shot","subjects_lifecycle":[{"subject_id":"<|Subject1|>","display_name":"potter","subject_attribute":"a woman in a clay-stained apron"}],"init_frame_visual_description":"A potter sits at a spinning wheel with a wet lump of clay, shelves of bowls behind her.","events":[{"event_index":0,"time_range_sec":"0 to 5","event_description":"She presses her thumbs into the clay and draws it up into a tall cylinder.","camera_motion":[{"time_range_sec":"0 to 5","camera_motion":["static"]}],"contained_actions":[{"time_range_sec":"0 to 5","action":"<|Subject1|> shapes the clay into a cylinder"}]}],"quality":{"video_quality":"sharp natural detail","text_logos_overlays":null,"artifacts":null}}
@@ -148,17 +157,7 @@ PAN 2 reads a **structured description** of the scene in JSON. A plain sentence 
 
 The full rules are in PAN 2's official [prompt guide](https://github.com/ifm-ai/PAN2/blob/main/inference/pan-prompt-rewriter/system_prompt.md). Giving that guide and your idea to a chat assistant is a quick way to get a good description.
 
----
-
-## 💡 Tips
-
-- **Turn off Dynamic Prompts** (sd-dynamic-prompts) while using PAN 2 - it reads the braces and the `|` of the JSON as its own syntax and changes the prompt
-- **Leave the negative prompt empty** to use the one PAN 2 was released with
-- Keep the description **under about 1480 tokens**: the token counter shows the count, and PAN 2 ignores what goes beyond 1536
-- Set the times in the description to the length of your clip - 241 frames are 0 to 10 seconds
-- From a picture, describe the picture in **init_frame_visual_description** and what happens next in **events**
-- Start with a short clip at a small size to check your setup, then go longer
-- PAN 2 is released under the [Apache 2.0 license](https://huggingface.co/IFM/PAN2). Read its intended uses and limits on the model page, and say that a video is AI-generated wherever it could be mistaken for real footage
+</details>
 
 ---
 
