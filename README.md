@@ -132,7 +132,7 @@ The **pan2** preset sets these.
 ## 💡 Tips
 
 - **Write structured descriptions.** PAN 2 was trained on descriptions of the scene in JSON, and follows them much better than a plain sentence - see the example below
-- **Turn off Dynamic Prompts** (sd-dynamic-prompts) while using PAN 2 - it reads the braces and the `|` of the JSON as its own syntax and changes the prompt
+- **Dynamic Prompts can stay on** - it would read the braces and the `|` of the JSON as its own syntax, so the extension gives PAN 2 the description exactly as you wrote it
 - **Leave the negative prompt empty** to use the one PAN 2 was released with
 - Keep the description **under about 1480 tokens**: the token counter shows the count, and PAN 2 ignores what goes beyond 1536
 - Set the times in the description to the length of your clip - 241 frames are 0 to 10 seconds

@@ -109,6 +109,41 @@ def process(p) -> None:
         p.extra_generation_params["PAN 2 negative prompt"] = "released default"
 
 
+def is_caption(text) -> bool:
+    """Whether a prompt starts with a PAN 2 world-state caption (a JSON object with its events)."""
+    text = text.lstrip() if isinstance(text, str) else ""
+    if not text.startswith("{"):
+        return False
+    try:
+        caption, _ = json.JSONDecoder().raw_decode(text)
+    except ValueError:
+        return False
+    return isinstance(caption, dict) and isinstance(caption.get("events"), list) and "video_style" in caption
+
+
+def _restore(original, batch: list, everything: list) -> bool:
+    if not is_caption(original) or all(text == original for text in batch):
+        return False
+    batch[:] = [original] * len(batch)
+    everything[:] = [original] * len(everything)
+    return True
+
+
+def restore_captions(p) -> None:
+    """sd-dynamic-prompts reads the { } and the | of a PAN 2 caption (its subject IDs are <|Subject1|>) as variants and
+    keeps one piece of each, which cannot be put back together; it leaves the prompt as written in p.prompt. Before the
+    batch is encoded (and its LoRA tags parsed), a broken caption is replaced by the one that was written."""
+    restored = _restore(getattr(p, "prompt", None), p.prompts, p.all_prompts)
+    restored |= _restore(getattr(p, "negative_prompt", None), p.negative_prompts, p.all_negative_prompts)
+    if restored:
+        print("[PAN 2] Dynamic Prompts changed the PAN 2 description: the prompt as written is used")
+
+
+def before_batch(p) -> None:
+    if _engine() is not None:
+        restore_captions(p)
+
+
 def before_sampling(p) -> None:
     engine = _engine()
     if engine is None or not engine.has_first_frame:

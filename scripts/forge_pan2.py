@@ -49,6 +49,9 @@ class Script(scripts.Script):
     def process(self, p, *args):
         integration.process(p)
 
+    def before_process_batch(self, p, *args, **kwargs):
+        integration.before_batch(p)
+
     def process_before_every_sampling(self, p, *args, **kwargs):
         integration.before_sampling(p)
 
