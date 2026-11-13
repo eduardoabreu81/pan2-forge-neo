@@ -86,15 +86,17 @@ def _hook_detection() -> None:
 def _hook_replace_state_dict() -> None:
     original = loader.replace_state_dict
 
-    def replace_state_dict(sd: dict, asd: dict, guess, path):
+    def replace_state_dict(sd: dict, asd: dict, *rest):
+        # Forge Neo calls (sd, asd, guess, path), and (sd, asd, metadata, guess, path) once its GGUF update lands
+        guess = rest[-2]
         if not isinstance(guess, model.PAN2):
-            return original(sd, asd, guess, path)
+            return original(sd, asd, *rest)
         if is_text_encoder(asd):
             _replace(sd, model.TEXT_PREFIX, text_encoder_keys(asd))
         elif vae.is_wan_vae(asd):
             _replace(sd, "vae.", vae.to_original(asd))
         else:
-            return original(sd, asd, guess, path)
+            return original(sd, asd, *rest)
         return sd
 
     loader.replace_state_dict = replace_state_dict
