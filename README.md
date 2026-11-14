@@ -76,7 +76,6 @@ Generate **videos of up to 20 seconds** with **[PAN 2](https://huggingface.co/IF
 
 ## 🚧 What is not here yet
 
-- **A visual editor for PAN 2's descriptions** - draw the events, camera moves and actions on a timeline, in the [Regional Boxes](https://github.com/eduardoabreu81/sd-regional-boxes-neo) panel
 - **Prompt rewriter** - the official workflow turns a short idea into PAN 2's structured description with a language model. Until it is here, write the description yourself or with any chat assistant (see [Tips](#-tips))
 - **Full-precision single files** - the official release is split into many files; for now use the single files in INT8 or NVFP4 listed below
 - **GGUF** files
@@ -115,7 +114,7 @@ NVFP4 runs natively on RTX 50 series cards; INT8 is closer to the original. The 
 
 The **pan2** preset sets these.
 
-**Width and Height** must be multiples of 32. PAN 2 was trained at **1248×704** (landscape); **704×1248** works for portrait.
+**Width and Height** must be multiples of 32. PAN 2 was trained at **1248×704** (landscape); **704×1248** works for portrait. Forge's Width and Height sliders move in steps of 64, so in the UI 1248 becomes **1280**, which works too; for 1248 exactly, set `"txt2img/Width/step": 32` and `"txt2img/Height/step": 32` (and the same for img2img) in `ui-config.json` with Forge closed.
 
 **Frames** sets the length and follows the pattern 4 × n + 1. The slider moves one second at a time:
 
@@ -134,7 +133,8 @@ The **pan2** preset sets these.
 - **Write structured descriptions.** PAN 2 was trained on descriptions of the scene in JSON, and follows them much better than a plain sentence - see the example below
 - **Dynamic Prompts can stay on** - it would read the braces and the `|` of the JSON as its own syntax, so the extension gives PAN 2 the description exactly as you wrote it
 - **Leave the negative prompt empty** to use the one PAN 2 was released with
-- Keep the description **under about 1480 tokens**: the token counter shows the count, and PAN 2 ignores what goes beyond 1536
+- Keep the description **under about 1480 tokens**: the token counter shows the count once PAN 2 is loaded (before the first generation it still shows the previous model's limit), and PAN 2 ignores what goes beyond 1536
+- **[Regional Boxes](https://github.com/eduardoabreu81/sd-regional-boxes-neo)** writes the description for you: with the **pan2** preset its panel becomes a timeline of the clip, with the events, camera moves and each subject's actions
 - Set the times in the description to the length of your clip - 241 frames are 0 to 10 seconds
 - From a picture, describe the picture in **init_frame_visual_description** and what happens next in **events**
 - Start with a short clip at a small size to check your setup, then go longer
