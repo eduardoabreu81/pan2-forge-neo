@@ -3,7 +3,7 @@
 import unittest
 from types import SimpleNamespace
 
-from forge_pan2.integration import is_caption, restore_captions
+from forge_pan2.integration import is_caption, noise_shape, restore_captions
 
 CAPTION = ('{"video_style":"one continuous shot","lighting":"dusk","perspective_view":"medium shot","subjects_lifecycle":'
            '[{"subject_id":"<|Subject1|>","display_name":"potter","subject_attribute":"a woman in an apron"}],'
@@ -51,6 +51,13 @@ class RestoreTests(unittest.TestCase):
         restore_captions(p)
         self.assertEqual(p.negative_prompts, [CAPTION])
         self.assertEqual(p.prompts, ["x"])
+
+
+class NoiseShapeTests(unittest.TestCase):
+    def test_width_and_height_follow_the_vae(self):
+        # Forge's shape for 49 frames at 640 x 352: 48 channels, 13 latent frames, height / 8, width / 8
+        self.assertEqual(noise_shape((48, 13, 44, 80), 352, 640), (48, 13, 22, 40))
+        self.assertEqual(noise_shape((48, 61, 88, 156), 704, 1248), (48, 61, 44, 78))
 
 
 if __name__ == "__main__":

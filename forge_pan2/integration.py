@@ -15,6 +15,7 @@ from .native import detect
 from .negative import default_negative
 
 MAX_HEADER_BYTES = 32 * 1024 * 1024
+VAE_SPATIAL = 16  # native/vae.py SPATIAL, kept here so this module imports without Forge
 
 
 @lru_cache(maxsize=32)
@@ -139,9 +140,28 @@ def restore_captions(p) -> None:
         print("[PAN 2] Dynamic Prompts changed the PAN 2 description: the prompt as written is used")
 
 
+def noise_shape(shape: tuple, height: int, width: int) -> tuple:
+    """Forge draws a video's noise at height / 8 and width / 8, the factor of image VAEs; PAN 2's VAE (Wan 2.2) is 16
+    times smaller on each side, so the last two sides follow it. The channels and latent frames stay as Forge set them."""
+    return (*shape[:-2], height // VAE_SPATIAL, width // VAE_SPATIAL)
+
+
+def resize_noise(p) -> None:
+    """Without this the clip is sampled and decoded at twice the width and height that were asked for."""
+    from modules import rng
+
+    current = tuple(p.rng.shape)
+    shape = noise_shape(current, p.height, p.width)
+    if shape == current:
+        return
+    p.rng = rng.ImageRNG(shape, p.seeds, subseeds=p.subseeds, subseed_strength=p.subseed_strength,
+                         seed_resize_from_h=p.seed_resize_from_h, seed_resize_from_w=p.seed_resize_from_w)
+
+
 def before_batch(p) -> None:
     if _engine() is not None:
         restore_captions(p)
+        resize_noise(p)
 
 
 def before_sampling(p) -> None:
