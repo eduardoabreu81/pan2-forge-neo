@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/banner.jpg" alt="PAN 2 for Forge Neo banner"/>
+</p>
+
 # 🌍 PAN 2 for Forge Neo
 
 <div align="center">
